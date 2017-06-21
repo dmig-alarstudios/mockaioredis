@@ -26,3 +26,15 @@ class GenericCommandsMixin:
                 existing += 1
 
         return existing
+
+    async def set(self, *args, **kwargs):
+        '''Set key'''
+        if 'expire' in kwargs:
+            kwargs['ex'] = kwargs.pop('expire')
+            if not kwargs['ex']:
+                kwargs['ex'] = None
+        return self._redis.set(*args, **kwargs)
+
+    async def get(self, key):
+        '''Get key(s)'''
+        return self._redis.get(key)
