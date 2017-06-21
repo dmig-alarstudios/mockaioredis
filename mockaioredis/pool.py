@@ -101,19 +101,20 @@ class MockRedisPool:
         await asyncio.shield(self._close_waiter, loop=self._loop)
 
 
-    async def acquire(self):
+    @asyncio.coroutine
+    def acquire(self):
         '''Pretend to aquire a connection.
 
         In fact, always return the same MockRedis object once free'''
-        async with self._cond:
+        with (yield from self._cond):
             while True:
-                await self._fill_free(override_min=True)
+                yield from self._fill_free(override_min=True)
                 if self.freesize:
                     conn = self._pool.popleft()
                     self._used.add(conn)
                     return conn
                 else:
-                    await self._cond.wait()
+                    yield from self._cond.wait()
 
 
     def release(self, conn):
@@ -153,11 +154,28 @@ class MockRedisPool:
                             commands_factory=self._factory,
                             loop=self._loop)
 
-
-    async def _wakeup(self):
+    async def _wakeup(self, closing_conn=None):
         async with self._cond:
             self._cond.notify()
+        if closing_conn is not None:
+            await closing_conn.wait_closed()
 
+    def __enter__(self):
+        raise RuntimeError(
+            "'yield from' should be used as a context manager expression")
+
+    def __exit__(self, *args):
+        pass    # pragma: nocover
+
+    def __iter__(self):
+        # this method is needed to allow `yield`ing from pool
+        conn = yield from self.acquire()
+        return _ConnectionContextManager(self, conn)
+
+    def __await__(self):
+        # To make `with await pool` work
+        conn = yield from self.acquire()
+        return _ConnectionContextManager(self, conn)
 
     def get(self):
         '''Return async context manager for working with the connection
@@ -166,6 +184,25 @@ class MockRedisPool:
             await conn.get(key)
         '''
         return _AsyncConnectionContextManager(self)
+
+
+class _ConnectionContextManager:
+
+    __slots__ = ('_pool', '_conn')
+
+    def __init__(self, pool, conn):
+        self._pool = pool
+        self._conn = conn
+
+    def __enter__(self):
+        return self._conn
+
+    def __exit__(self, exc_type, exc_value, tb):
+        try:
+            self._pool.release(self._conn)
+        finally:
+            self._pool = None
+            self._conn = None
 
 
 class _AsyncConnectionContextManager:
@@ -186,5 +223,3 @@ class _AsyncConnectionContextManager:
         finally:
             self._pool = None
             self._conn = None
-
-
