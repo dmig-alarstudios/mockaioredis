@@ -38,3 +38,7 @@ class GenericCommandsMixin:
     async def get(self, key):
         '''Get key(s)'''
         return self._redis.get(key)
+
+    async def incr(self, key):
+        '''Increment key'''
+        return self._redis.incr(key)
