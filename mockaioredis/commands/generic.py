@@ -35,6 +35,10 @@ class GenericCommandsMixin:
                 kwargs['ex'] = None
         return self._redis.set(*args, **kwargs)
 
+    def ping(self, *args, **kwargs):
+        '''Ping server.'''
+        return
+
     async def get(self, key):
         '''Get key(s)'''
         return self._redis.get(key)
