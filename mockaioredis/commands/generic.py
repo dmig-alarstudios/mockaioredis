@@ -114,10 +114,9 @@ class GenericCommandsMixin:
     async def dbsize(self):
         return self._redis.dbsize()
 
-    def ping(self, *args, **kwargs):
+    async def ping(self):
         '''Ping server.'''
-        return
-
+        return self._redis.ping()
 
     async def scan(self, cursor=0, match=None, count=None):
         """Incrementally iterate the keys space."""
