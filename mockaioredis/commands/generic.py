@@ -113,3 +113,7 @@ class GenericCommandsMixin:
 
     async def dbsize(self):
         return self._redis.dbsize()
+
+    def ping(self, *args, **kwargs):
+        '''Ping server.'''
+        return
