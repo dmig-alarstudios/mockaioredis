@@ -121,15 +121,15 @@ class MockRedisPool:
         '''Pretend to aquire a connection.
 
         In fact, always return the same MockRedis object once free'''
-        with (yield from self._cond):
+        with (await self._cond):
             while True:
-                yield from self._fill_free(override_min=True)
+                await self._fill_free(override_min=True)
                 if self.freesize:
                     conn = self._pool.popleft()
                     self._used.add(conn)
                     return conn
                 else:
-                    yield from self._cond.wait()
+                    await self._cond.wait()
 
     def release(self, conn):
         '''Release our single MockRedis connection'''
