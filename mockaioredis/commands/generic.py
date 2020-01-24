@@ -33,6 +33,8 @@ class GenericCommandsMixin:
     def pipeline(self, transaction=True, shard_hint=None):
         return AsyncMockRedisPipeline(self, transaction, shard_hint)
 
+    multi_exec = pipeline
+
     async def delete(self, key, *keys):
         """Delete specified key(s)"""
         return self._redis.delete(key, *keys)
