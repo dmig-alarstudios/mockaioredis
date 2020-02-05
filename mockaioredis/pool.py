@@ -121,7 +121,7 @@ class MockRedisPool:
         '''Pretend to aquire a connection.
 
         In fact, always return the same MockRedis object once free'''
-        async with  self._cond:
+        async with self._cond:
             while True:
                 await self._fill_free(override_min=True)
                 if self.freesize:
