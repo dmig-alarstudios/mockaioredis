@@ -201,6 +201,18 @@ class MockRedisPool:
         conn = yield from self.acquire().__await__()
         return _ConnectionContextManager(self, conn)
 
+    def __enter__(self):
+        raise RuntimeError(
+            "'await' should be used as a context manager expression")
+
+    def __exit__(self, *args):
+        pass    # pragma: nocover
+
+    def __await__(self):
+        # To make `with await pool` work
+        conn = yield from self.acquire().__await__()
+        return _ConnectionContextManager(self, conn)
+
     def get(self):
         '''Return async context manager for working with the connection
 
