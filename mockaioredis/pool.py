@@ -172,7 +172,7 @@ class MockRedisPool:
 
     def __enter__(self):
         raise RuntimeError(
-            "'yield from' should be used as a context manager expression")
+            "'await' should be used as a context manager expression")
 
     def __exit__(self, *args):
         pass    # pragma: nocover
