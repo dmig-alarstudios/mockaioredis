@@ -123,3 +123,7 @@ class GenericCommandsMixin:
     async def scan(self, cursor=0, match=None, count=None):
         """Incrementally iterate the keys space."""
         return self._redis.scan(cursor=cursor, match=match, count=count)
+        
+    def close(self):
+        pass
+

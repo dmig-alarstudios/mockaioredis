@@ -19,9 +19,6 @@ class MockRedis(GenericCommandsMixin, HashCommandsMixin, ListCommandsMixin, SetC
 
         self._encoding = encoding
 
-    def close(self):
-        pass
-
 
 async def create_redis(address, *, db=None, password=None, ssl=None,
                        encoding=None, commands_factory=MockRedis,
