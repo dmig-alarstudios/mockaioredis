@@ -166,11 +166,9 @@ class MockRedisPool:
                             commands_factory=self._factory,
                             loop=self._loop)
 
-    async def _wakeup(self, closing_conn=None):
+    async def _wakeup(self):
         async with self._cond:
             self._cond.notify()
-        if closing_conn is not None:
-            await closing_conn.wait_closed()
 
     def __enter__(self):
         raise RuntimeError(
